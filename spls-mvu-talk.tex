@@ -13,10 +13,11 @@
 \input{config/custom-command}
 \usepackage{verbatim}
 % Information
-\title{Hopefully something mildly interesting}
+\title{Model-View-Update-Communicate}
+\subtitle{Session Types meet the Elm Architecture}
 \author{Simon Fowler}
 \institute{University of Edinburgh}
-\date{12th March 2019}
+\date{SPLS \\ 30th October 2019}
 
 \begin{document}
 
@@ -35,13 +36,347 @@ $
 $
 \end{frame}
 
+\framecard{{\color{white}\bigtext{Demo: Two-Factor Authentication}}}
 
-\begin{frame}{A sample frame}
-  \begin{fullpageitemize}
-    \item Beamer is cool if people can't tell you're using Beamer
+
+\begin{frame}[fragile]{2FA as a session type}
+
+    \begin{minipage}{0.45\textwidth}
+    {\normalsize
+\[
+\bl
+  \calcwd{TwoFactorServer} \defeq \\
+  \quad\gvinone{(\mkwd{Username}, \mkwd{Password})} . \mathord{\oplus} \{ \\
+  \qquad \mkwd{Authenticated}: \calcwd{ServerBody}, \\
+  \qquad \mkwd{Challenge}: \gvoutone{\mkwd{ChallengeKey}} .
+  \gvinone{\mkwd{Response}} . \\
+  \qquad \quad \mathord{\oplus} \{
+    \begin{aligned}[t]
+     & \mkwd{Authenticated}: \calcwd{ServerBody}, \\
+     & \mkwd{AccessDenied}: \gvend \}, \\
+  \end{aligned} \\
+  \qquad \mkwd{AccessDenied}: \gvend \}
+\el
+\]
+}
+\end{minipage}
+~\hfill
+%
+\begin{minipage}{0.45\textwidth}
+  {\small
+\[
+\bl
+  \calcwd{TwoFactorClient} \defeq \\
+  \quad\gvoutone{(\mkwd{Username}, \mkwd{Password})} . \mathord{\&} \{ \\
+  \qquad \mkwd{Authenticated}: \calcwd{ClientBody}, \\
+  \qquad \mkwd{Challenge}: \gvinone{\mkwd{ChallengeKey}} .
+    \gvoutone{\mkwd{Response}} . \\
+  \qquad \quad \mathord{\&} \{
+    \begin{aligned}[t]
+    & \mkwd{Authenticated}: \calcwd{ClientBody}, \\
+    & \mkwd{AccessDenied}: \gvend \}, \\
+    \end{aligned} \\
+    \qquad \mkwd{AccessDenied}: \gvend \}
+\el
+\]
+}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{A 2FA server}
+
+{\large
+\[
+  \bl
+  \metadef{twoFactorServer} : \metadef{TwoFactorServer} \lto \one \\
+  \metadef{twoFactorServer}(s) \defeq \\
+  \quad \letintwo{((\textit{username}, \textit{password}), s)}{\gvrecv{s}} \\
+  \quad \calcwd{if} \: \metadef{checkDetails}(\textit{username},
+  \textit{password})\: \calcwd{then} \\
+  \qquad \letintwo{s}{\calcwd{select} \: \mkwd{Authenticated} \: s} \: \metadef{serverMain}(s) \\
+  \quad \calcwd{else} \\
+  \qquad \letin{s}{\calcwd{select} \: \mkwd{AccessDenied} \: s}{\gvclose{s}} \\
+  \el
+\]
+}
+\end{frame}
+
+\begin{frame}{Client code?}
+
+  \pause
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{images/here-be-dragons.jpg}
+\end{center}
+\hfill \tiny{\url{https://store.steampowered.com/app/945680/Here_Be_Dragons/}}
+\end{frame}
+
+\framecard{{\color{white}\bigtext{Demo: A box and a label}}}
+\begin{frame}[fragile]{The Old-Fashioned Way}
+
+
+  \begin{minipage}{0.6\textwidth}
+\begin{lstlisting}[language=JavaScript]
+function updateLabel() {
+  const value =
+    document.getElementById("box").value;
+  const labelNode =
+    document.getElementById("label");
+  labelNode.textContent =
+    reverse(value);
+}
+\end{lstlisting}
+\begin{lstlisting}[language=JavaScript]
+<html>
+  <body>
+    <input id="box" type="text"
+      onInput="updateLabel()" />
+    <div id="label"></div>
+  </body>
+</html>
+\end{lstlisting}%
+\end{minipage}
+\hfill
+\begin{minipage}{0.35\textwidth}
+    \begin{tikzpicture}[node distance=1.5cm]
+      \node (0) [diagnode] { Event invoked };
+      \node (1) [diagnode, below of=0]{ Message sent to handler };
+      \node (2) [diagnode, below of=1]{ Process reads data from DOM };
+      \node (3) [diagnode, below of=2]{ Process updates data in DOM };
+
+      \draw [arrow] (0) -- (1);
+      \draw [arrow] (1) -- (2);
+      \draw [arrow] (2) -- (3);
+    \end{tikzpicture}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Model-View-Update}
+\end{frame}
+
+\begin{frame}{Challenges}
+
+    \begin{fullpageitemize}
+  \item {\Large \textbf{What is a core formal model for MVU?}}
+    \begin{itemize}
+      \itemR At present, implementers must re-discover the essence of the architecture
+      \itemR No formal reasoning, and no way of checking if extensions are sound
+    \end{itemize}
+    \vspace{1em}
+  \item {\Large \textbf{How can MVU be extended to support session-typed web applications?}}
+    \begin{itemize}
+      \itemR Writing client code using distributed session-typed channels in Links is painful: can we do better?
+      \itemR Would provide first formal integration of session types and GUIs
+    \end{itemize}
   \end{fullpageitemize}
 \end{frame}
 
-\framecard{{\color{white}\bigtext{A section separator}}}
+\framecard{{\color{white}\bigtext{$\mvu$: Model-View-Update, Formally}}}
+
+\begin{frame}{Syntax}
+\end{frame}
+
+\begin{frame}{Syntactic Sugar}
+
+    \[
+      \left\llbracket
+    \begin{array}{l}
+      %\mkwd{view} \defeq \lambda \textit{model} . \calcwd{html} \\
+      \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+      \attribute{value} = \{ \var{model}.\var{contents} \} \\
+      \quad
+        \attribute{onInput} = \{ \lambda \textit{str}.
+          \mkwd{UpdateBox}(\textit{str})\} \closetag \tagzeroend{input}  \\
+          %
+        \htmltagzero{div}{\antiquote{\htmltext{(\metadef{reverseString} \:
+        (\textit{model}. \textit{contents}))}}}
+    \end{array}
+    \right\rrbracket
+  \]
+  \[
+    =
+  \]
+  \[
+    \begin{array}{l}
+        (\coretagone{input} \\
+        \quad ((\attr{\attribute{type}}{\textnode{"text"}}) \star
+        (\attr{\attribute{value}}{\var{model}.\var{contents}}) \star \\
+         \qquad
+         (\attr{\attribute{onInput}}{(\lambda \textit{str}.
+         \mkwd{UpdateBox}(\textit{str})}))) \: \htmlempty) \: \star \\
+         \quad
+         \coretag{div}{\attrempty}{(\htmltext{\metadef{reverseString} \:
+         (\textit{model}.\textit{contents}}))}
+    \end{array}
+  \]
+\end{frame}
+
+\begin{frame}{Semantics by example: Box and a label}
+
+  \[
+  \only<1>{
+    \run{V_m}{V_v}{V_u}
+  }
+  %
+  \only<2>{
+    \sys{\handlerprocexp{(V_m, V_v V_m)}{V_v}{V_u}{\epsilon}}{\htmlempty}
+  }
+  %
+  \only<3>{
+    \sys{\handlerprocexp{(V_m,
+        \bl
+        \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
+          \attribute{value}=\textnode{""} \\
+            \quad  \attribute{onInput} = \{ \lambda \var{str}.
+              \mkwd{UpdateBox}(\var{str})\} \closetag \\
+              \tagzeroend{input}  \\
+               \htmltagzero{div}{}
+        \el
+      )}{V_v}{V_u}{\epsilon}}{\htmlempty}
+  }
+  %
+  \only<4>{
+      \sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon}}{
+      {\bl
+        \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
+        \attribute{value}=\textnode{""} \\
+          \quad  \attribute{onInput} = \{ \lambda \var{str}.
+            \mkwd{UpdateBox}(\var{str})\} \qsep \epsilon \closetag \tagzeroend{input}  \\
+            \htmltagqueue{div}{\epsilon}{}
+      \el}
+    }
+  }
+  %
+  \only<5>{
+        \sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon}}{
+      \bl
+      \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+      \attribute{value}=\textnode{""} \\
+              \quad \attribute{onInput} = \{ \lambda \var{str}.
+              \mkwd{UpdateBox}(\var{str})\} \qsep \evtpayload{click}{()} \cdot \\
+              \quad \evtpayload{keyDown}{75} \cdot \evtpayload{keyUp}{75} \cdot
+              \evtpayload{input}{\textnode{"k"}}\closetag \tagzeroend{input} \\
+              \htmltagqueue{div}{\epsilon}{}
+      \el
+    }
+  }
+  %
+  \only<6>{
+    \sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon}}{
+        \bl
+        \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+        \attribute{value}=\textnode{""} \\
+                \quad \attribute{onInput} = \{ \lambda \var{str}.
+                \mkwd{UpdateBox}(\var{str})\} \qsep
+                  \evtpayload{input}{\textnode{"k"}}\closetag
+                  \\ \tagzeroend{input} \\
+                \htmltagqueue{div}{\epsilon}{}
+        \el
+    }
+  }
+  %
+  \only<7>{
+\sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon} \parallel
+          \thread{\mkwd{UpdateBox}(\textnode{"k"})}}{
+        \bl
+        \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+        \attribute{value}=\textnode{""} \\
+                \quad \attribute{onInput} = \{ \lambda \var{str}.
+                \mkwd{UpdateBox}(\var{str})\}
+                \\ \qsep \epsilon \closetag \tagzeroend{input} \\
+                \htmltagqueue{div}{\epsilon}{}
+        \el
+    }
+  }
+  %
+  \only<8>{
+\sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\mkwd{UpdateBox}(\textnode{"k"})}}{
+        \bl
+        \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+        \attribute{value}=\textnode{""} \\
+                \quad \attribute{onInput} = \{ \lambda \var{str}.
+                \mkwd{UpdateBox}(\var{str})\}
+                \\ \qsep \epsilon \closetag \tagzeroend{input} \\
+                \htmltagqueue{div}{\epsilon}{}
+        \el
+      }
+  }
+  %
+  \only<9>{
+      \sys{\handlerprocexp{\handle{V_m, (V_v, V_u), \mkwd{UpdateBox}(\textnode{"k"})}}{V_v}{V_u}{\epsilon}}{
+        \bl
+        \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+        \attribute{value}=\textnode{""} \\
+                \quad \attribute{onInput} = \{ \lambda \var{str}.
+                \mkwd{UpdateBox}(\var{str})\}
+                \\ \qsep \epsilon \closetag \tagzeroend{input} \\
+                \htmltagqueue{div}{\epsilon}{}
+        \el
+      }
+  }
+  %
+  \only<10>{
+          \sys{\handlerprocexp{(
+    \bl
+      (\var{contents}=\textit{"k"}), \\
+       \quad \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
+         \attribute{value}=\textnode{"k"} \\
+        \qquad  \attribute{onInput} = \{ \lambda \var{str}.
+           \mkwd{UpdateBox}(\var{str})\} \closetag \\
+        \quad \tagzeroend{input}  \\
+           \quad  \htmltagzero{div}{k} \\
+    \el
+        )}{V_v}{V_u}{\epsilon}}{
+        \bl
+        \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+        \attribute{value}=\textnode{""} \\
+                \quad \attribute{onInput} = \{ \lambda \var{str}.
+                \mkwd{UpdateBox}(\var{str})\}
+                \\ \qsep \epsilon \closetag \tagzeroend{input} \\
+                \htmltagqueue{div}{\epsilon}{}
+        \el
+      }
+  }
+  %
+  \only<11>{
+    \sys
+{ \bl
+   \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
+   \attribute{value}=\textnode{"k"} \\
+     \quad  \attribute{onInput} = \{ \lambda \var{str}.
+       \mkwd{UpdateBox}(\var{str})\} \qsep \epsilon \closetag \tagzeroend{input}  \\
+       \htmltagqueue{div}{\epsilon}{\textnode{k}}
+\el
+}
+  }
+\]
+\end{frame}
+
+\begin{frame}{Metatheory}
+\end{frame}
+
+\framecard{{\color{white}\bigtext{Extending $\mvu$}}}
+
+\begin{frame}{Commands}
+\end{frame}
+
+\begin{frame}{Linearity}
+\end{frame}
+
+\framecard{{\color{white}\bigtext{Demo: PingPong application}}}
+
+\begin{frame}{PingPong in $\mvu$}
+\end{frame}
+
+\begin{frame}{Model transitions}
+\end{frame}
+
+\framecard{{\color{white}\bigtext{Wrapping up}}}
+
+\begin{frame}{Conclusion}
+  \begin{fullpageitemize}
+  \itemR Draft paper! \url{http://simonjf.com/drafts/links-mvu-draft-october2019-1.pdf}
+  \end{fullpageitemize}
+\end{frame}
 
 \end{document}
+

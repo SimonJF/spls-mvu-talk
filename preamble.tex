@@ -16,35 +16,139 @@
 \usepackage{etoolbox}% http://ctan.org/pkg/etoolbox
 \newcommand{\lambdacalc}{\ensuremath{\lambda}-calculus\xspace}
 \newenvironment{fake}[1]{\par\vspace{3pt}\noindent\textbf{#1}\itshape}{\normalfont\ignorespacesafterend\vspace{3pt}\par}
+\newcommand{\calcwd}[1]{\textbf{\textsf{#1}}}
+\newcommand{\one}{\ensuremath{\mathbf{1}}}
+\newcommand{\mvu}{\ensuremath{\lambda_{\mathsf{MVU}}}\xspace}
+\newcommand{\mvupi}{\ensuremath{\lambda_{\mathsf{MVU}}^{\pi}}\xspace}
+\newcommand{\app}{\:}
+\newcommand{\oftype}{\: {:} \:}
+\newcommand{\letin}[3]{\calcwd{let} \: #1 = #2 \: \calcwd{in} \: #3}
+\newcommand{\letintwo}[2]{\calcwd{let} \: #1 = #2 \: \calcwd{in}}
 
-\usepackage{float}
-\floatstyle{boxed}
-\restylefloat{figure}
-\usepackage{verbatim}
+\newcommand{\caseof}[2]{\calcwd{case} \: #1 \: \{ #2 \}}
+\newcommand{\caseofone}[1]{\calcwd{case} \: #1 \: }
+\newcommand{\midspace}{\: \mid \:}
+\newcommand{\mkwd}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\antiquote}[1]{\mathbf{\{} #1 \mathbf{\}}}
+\newcommand{\htmlty}[1]{\mkwd{Html}(#1)}
+\newcommand{\attrty}[1]{\mkwd{Attr}(#1)}
+\newcommand{\tagname}[1]{\textsf{#1}}
+\newcommand{\smalllt}{\scalebox{0.85}{<}}
+\newcommand{\smallgt}{\scalebox{0.85}{>}}
+\newcommand{\htmltag}[3]{\smalllt \tagname{#1} \: #2 \smallgt #3 \smalllt / \tagname{#1} \smallgt}
+\newcommand{\htmltagzero}[2]{\smalllt \tagname{#1} \smallgt #2 \smalllt / \tagname{#1} \smallgt}
+\newcommand{\htmltagqueue}[3]{\smalllt \tagname{#1} \qsep #2 \smallgt #3 \smalllt / \tagname{#1} \smallgt}
+\newcommand{\tagzero}[1]{\smalllt \tagname{#1}\smallgt}
+\newcommand{\tagzeroend}[1]{\smalllt / \tagname{#1}\smallgt}
+\newcommand{\opentag}[1]{\smalllt \tagname{#1}}
+\newcommand{\closetag}{\smallgt}
 
-\newcommand{\backupbegin}{
-   \newcounter{finalframe}
-   \setcounter{finalframe}{\value{framenumber}}
-}
-\newcommand{\backupend}{
-   \setcounter{framenumber}{\value{finalframe}}
-}
+\newcommand{\config}[1]{\mathcal{#1}}
+\newcommand{\htmlterm}[1]{\calcwd{html} \app #1}
+\newcommand{\attrterm}[1]{\calcwd{attribute} \app #1}
+\newcommand{\seq}[1]{\overrightarrow{#1}}
+\newcommand{\inl}[1]{\calcwd{inl} \: #1}
+\newcommand{\inr}[1]{\calcwd{inr} \: #1}
+\newcommand{\evtty}[1]{\ensuremath{\mkwd{ty}(#1)}}
+\newcommand{\evt}[1]{\ensuremath{\mkwd{#1}}}
+\newcommand{\qstr}[1]{\texttt{"}#1\texttt{"}}
 
-\setbeamercovered{%
-  again covered={\opaqueness<1->{15}}}
+\newcommand{\ev}{\evt{ev}\xspace}
+\newcommand{\evtpayload}[2]{\evt{#1}(#2)}
+\newcommand{\clickevt}{\ensuremath{\attribute{click}}}
+\newcommand{\inputevt}{\ensuremath{\attribute{input}}}
+\newcommand{\keydownevt}{\ensuremath{\attribute{keyDown}}}
+\newcommand{\keyupevt}{\ensuremath{\attribute{keyUp}}\xspace}
+\newcommand{\keypressevt}{\ensuremath{\attribute{keyPress}}\xspace}
+\newcommand{\mousemoveevt}{\ensuremath{\attribute{mouseMove}}\xspace}
+\newcommand{\vh}{D}
+\newcommand{\pgctx}[1]{\config{D}[#1]}
+\newcommand{\mh}{M\xspace}
+\newcommand{\vc}{V_{\textsf{C}}\xspace}
+\newcommand{\va}{V_{\textsf{a}}\xspace}
 
+\newcommand{\ctxh}{E_{\textsf{H}}}
+\newcommand{\ctxa}{E_{\textsf{a}}}
 
+\newcommand{\state}[2]{(#1, #2)}
+\newcommand{\statecomb}[3]{(#1, #2, #3)}
+\newcommand{\statesub}[3]{(#1, #2, #3)}
+\newcommand{\handlerproc}[3]{\langle #1 \mid #2 \mid #3 \rangle}
+\newcommand{\handlerprocexp}[4]{\langle #1 \mid \state{#2}{#3} \mid #4 \rangle}
+\newcommand{\handlerprocsub}[5]{\langle #1 \mid \statesub{#2}{#3}{#4} \mid #5 \rangle}
+\newcommand{\idle}[1]{\calcwd{idle} \: {#1}}
+\newcommand{\sys}[2]{#1 \fatsemi\: #2}
+\newcommand{\syssub}[4]{#1 \fatsemi\: #2 \fatsemi\: #3 \fatsemi\: #4}
 
-% TIKZ STUFF
+\newcommand{\evalarrow}{\longrightarrow}
+\newcommand{\teval}{\evalarrow_{\textsf{M}}}
+\newcommand{\ceval}{\evalarrow}
+\newcommand{\cevalminus}{\evalarrow_{\textsf{E}}}
+\newcommand{\totheleft}[1]{\begin{flushleft}#1\end{flushleft}}
+\newcommand{\evthandler}[1]{\ensuremath{\attribute{#1}}}
+\newcommand{\getevthandler}[3]{#1(#2, #3)}
+\newcommand{\handler}[1]{\mkwd{handler}(#1)}
+\newcommand{\payload}[1]{\mkwd{payload}(#1)}
+\newcommand{\id}[1]{\mkwd{id}(#1)}
 
+\newcommand{\handle}[1]{\mkwd{handle}(#1)}
 
-\usepackage{amsmath,verbatim}
+\newcommand{\defeq}{\triangleq}
+\newcommand{\vdashs}{\vdash_{\textsf{T}}}
+\newcommand{\ttrue}{\mkwd{true}}
+\newcommand{\ffalse}{\mkwd{false}}
+\newcommand{\intty}{\mkwd{Int}}
+\newcommand{\boolty}{\mkwd{Bool}}
+\newcommand{\stringty}{\mkwd{String}}
+
+\newcommand{\deriv}[1]{\mathbf{#1}}
+\newcommand{\produces}[1]{\:{!}\:#1}
+\newcommand{\thread}[1]{(\!( #1 )\!)}
+\newcommand{\wcirc}{\circ}
+\newcommand{\bcirc}{\bullet}
+
+\newcommand{\subscriptionty}[1]{\mkwd{Sub}(#1)}
+\newcommand{\subscription}[2]{\calcwd{sub} \: #1 \: #2}
+\newcommand{\subempty}{\calcwd{subEmpty}}
+\newcommand{\emptylist}{\textbf{[}~\textbf{]}}
+\newcommand{\cons}[2]{#1 :: #2}
+\newcommand{\eh}{h}
+\newcommand{\listty}[1]{\mkwd{List}(#1)}
+\newcommand{\metadef}[1]{\mkwd{#1}}
+\newcommand{\events}[1]{\metadef{events}(#1)}
+\newcommand{\vs}{{V_{\mathsf{S}}}}
+\newcommand{\evthandlers}[2]{\mkwd{eventHandlers}(#1, #2)}
+\newcommand{\desugar}[1]{\llbracket #1 \rrbracket}
+
+\newcommand{\gvconst}[1]{\calcwd{#1}}
+\newcommand{\gvsend}[2]{\calcwd{send} \app (#1, #2)}
+\newcommand{\gvrecv}[1]{\calcwd{receive} \app #1}
+\newcommand{\gvcancel}[1]{\calcwd{cancel} \app #1}
+\newcommand{\gvclose}[1]{\calcwd{close} \app #1}
+\newcommand{\gvnew}[1]{\calcwd{new} \: #1}
+\newcommand{\tryasinotherwise}[4]{\calcwd{try} \: #1 \: \calcwd{as} \: #2 \: \calcwd{in} \: #3 \: \calcwd{otherwise} \: #4}
+\newcommand{\raiseexn}{\calcwd{raise}\xspace}
+\newcommand{\ppos}[1]{#1^{+}}
+\newcommand{\pneg}[1]{#1^{-}}
+\newcommand{\gvout}[2]{{!}#1.#2}
+\newcommand{\gvin}[2]{{?}#1.#2}
+\newcommand{\gvoutone}[1]{{!}#1}
+\newcommand{\gvinone}[1]{{?}#1}
+
+\newcommand{\gvend}{\mkwd{End}}
+\newcommand{\gvqueue}[4]{#1(#2)\leftrightsquigarrow #3(#4)}
+\newcommand{\zap}[1]{\lightning #1}
+\newcommand{\gvdual}[1]{\overline{#1}}
+\newcommand{\without}{/}
+\newcommand{\apty}[1]{\mkwd{AP}(#1)}
+\newcommand{\var}[1]{\textit{#1}}
+
 
 \lstdefinelanguage{Links}{%
   morekeywords={typename, fun, linfun, op, var, if, this, true, false, else, case, switch, handle,
     handler, shallowhandler, open, do, sig, new, send, receive, spawnAt, spawn,
-module, request, accept, try, as, in, otherwise, catch, offer, select, raise,
-fork, spawnClient, cancel, catch},%
+module, request, accept, try, as, otherwise, catch, offer, select, raise,
+fork, spawnClient, cancel, catch, page, close, Any, Type, Unl, forall, vdom},%
   sensitive=t, %
   comment=[l]{\#\ },%
   escapeinside={(*}{*)},%
@@ -56,182 +160,139 @@ fork, spawnClient, cancel, catch},%
 
 % Links style
 \lstset{
-  basicstyle=\linespread{1.3}\ttfamily\large,
+  basicstyle=\linespread{0.86}\ttfamily\small,
   keywordstyle=\bfseries,
   language=Links,
   backgroundcolor=\color{white}
 }
 
 
-\usepackage{expl3,xparse}
-\makeatletter
-\let\old@lstKV@SwitchCases\lstKV@SwitchCases
-\def\lstKV@SwitchCases#1#2#3{}
-\makeatother
-\usepackage{lstlinebgrd}
-\makeatletter
-\let\lstKV@SwitchCases\old@lstKV@SwitchCases
+\newcommand{\idattr}{\textit{id}\xspace}
+\newcommand{\desugarterm}[1]{\llbracket #1 \rrbracket}
+\newcommand{\desugarhtml}[1]{\llbracket #1 \rrbracket}
+\newcommand{\desugarattr}[1]{\llbracket #1 \rrbracket}
 
-\lst@Key{numbers}{none}{%
-    \def\lst@PlaceNumber{\lst@linebgrd}%
-    \lstKV@SwitchCases{#1}%
-    {none:\\%
-     left:\def\lst@PlaceNumber{\llap{\normalfont
-                \lst@numberstyle{\thelstnumber}\kern\lst@numbersep}\lst@linebgrd}\\%
-     right:\def\lst@PlaceNumber{\rlap{\normalfont
-                \kern\linewidth \kern\lst@numbersep
-                \lst@numberstyle{\thelstnumber}}\lst@linebgrd}%
-    }{\PackageError{Listings}{Numbers #1 unknown}\@ehc}}
-\makeatother
+\newcommand{\coretagone}[1]{\calcwd{htmlTag} \: \tagname{#1}}
+\newcommand{\coretagtwo}[2]{\calcwd{htmlTag} \: \tagname{#1} \: #2}
+\newcommand{\coretag}[3]{\calcwd{htmlTag} \: \tagname{#1} \: #2 \: #3}
+\newcommand{\htmltext}[1]{\calcwd{htmlText} \: #1}
+\newcommand{\htmlempty}{\calcwd{htmlEmpty}}
+\newcommand{\append}[2]{#1 \star #2}
 
-\ExplSyntaxOn
-\NewDocumentCommand \lstcolorlines { O{green} m }
-{
-  \clist_if_in:nVTF { #2 } { \the\value{lstnumber} }{ \color{#1} }{\color{white}}
-}
-\ExplSyntaxOff
-\newcommand{\textl}{\text{\lightning}}
+\newcommand{\attr}[2]{\calcwd{attr} \: #1 \: #2}
+\newcommand{\attrempty}{\calcwd{attrEmpty}}
+\newcommand{\ak}{\mathit{ak}}
+\newcommand{\at}{\mathit{at}}
+\newcommand{\run}[3]{\calcwd{run} \: #1 \: #2 \: #3}
+\newcommand{\runsub}[4]{\calcwd{run} \: #1 \: #2 \: #3 \: #4}
 
+\lstdefinelanguage{JavaScript}{
+  morekeywords=[1]{break, continue, delete, else, for, function, if, in,
+    new, return, this, typeof, var, void, while, with},
+  % Literals, primitive types, and reference types.
+  morekeywords=[2]{false, null, true, boolean, number, undefined,
+    Array, Boolean, Date, Math, Number, String, Object, const},
+  % Built-ins.
+  morekeywords=[3]{eval, parseInt, parseFloat, escape, unescape},
+  sensitive,
+  morecomment=[s]{/*}{*/},
+  morecomment=[l]//,
+  morecomment=[s]{/**}{*/}, % JavaDoc style comments
+  morestring=[b]',
+  morestring=[b]"
+}[keywords, comments, strings]
 
-\newcommand{\calcwd}[1]{\mathbf{\mathbf{#1}}}
-\newcommand{\one}{\mathbf{1}}
-\newcommand{\lightningnu}[1]{\nu #1\lightning}
-\newcommand{\gvqueue}[4]{#1(#2){\leftrightsquigarrow} #3(#4)}
-\newcommand{\mkwd}[1]{\ensuremath{\mathsf{#1}}}
-\newcommand{\gvsend}[2]{\calcwd{send} \: #1 \: #2}
-\newcommand{\gvrecv}[1]{\calcwd{receive} \: #1}
-\newcommand{\gvcancel}[1]{\calcwd{cancel} \app #1}
-\newcommand{\gvclose}[1]{\calcwd{close} \app #1}
-\newcommand{\gvcancelup}[1]{\calcwd{cancel} \app #1}
-\newcommand{\gvout}[2]{!{#1}.{#2}}
-\newcommand{\gvin}[2]{?{#1}.{#2}}
-\newcommand{\gvend}{\mathsf{End}\xspace}
-\newcommand{\gvfork}[1]{\calcwd{fork} \, #1}
-\newcommand{\app}{\:}
-\newcommand{\inl}[1]{\calcwd{inl} \app #1}
-\newcommand{\inr}[1]{\calcwd{inr} \app #1}
-\newcommand{\gvcase}[2]{\calcwd{case} \: #1 \: \calcwd{of} \: \{ #2 \}  }
-\newcommand{\gvlet}[3]{\calcwd{let} \: #1 = #2 \: \calcwd{in} \: #3}
-\newcommand{\tryasinotherwise}[4]{\calcwd{try} \: #1 \: \calcwd{as} \: #2 \: \calcwd{in} \: #3 \: \calcwd{otherwise} \: #4}
-\newcommand{\raiseexn}{\calcwd{raise}\xspace}
+\newcommand{\bl}{\begin{array}{l}}
+\newcommand{\el}{\end{array}}
+\newcommand{\intstr}[1]{\mkwd{intToString}(#1)}
+\newcommand{\cmdty}[1]{\mkwd{Cmd}(#1)}
+\newcommand{\cmdempty}{\calcwd{cmdEmpty}}
+\newcommand{\cmdspawn}[1]{\calcwd{cmdSpawn} \: #1}
+\newcommand{\cmdspawnlinear}[1]{\calcwd{cmdSpawnLinear} \: #1}
 \newcommand{\un}[1]{\mkwd{un}(#1)}
-\newcommand{\gvdual}[1]{\overline{#1}}
-%\newcommand{\compat}{\asymp}
-\newcommand{\evalperhaps}{\eval^?}
-\newcommand{\evalstar}{\eval^*}
-\newcommand{\scancel}[1]{\text{\lightning} #1}
-\newcommand{\scancelmv}[1]{#1 \lightning}
-\newcommand{\config}[1]{\mathcal{#1}}
-\newcommand{\seq}[1]{\overrightarrow{#1}}
-\newcommand{\fv}[1]{\mathsf{fv}(#1)}
-%\newcommand{\fcv}[1]{\mathsf{fcv}(#1)}
-\newcommand{\fvs}[1]{\mathsf{fvs}(#1)}
-\newcommand{\fn}[1]{\mathsf{fn}(#1)}
-\newcommand{\fcvs}[1]{\fn{#1}}
-\newcommand{\chansharp}[1]{#1^{\sharp}}
-\newcommand{\chanflat}[1]{#1^{\flat}}
-\newcommand{\without}{/}
-\newcommand{\equivceval}{\equiv \longrightarrow_{\textsf{C}} \equiv}
-\newcommand{\cevalthick}{\Longrightarrow_{\textsf{C}}}
-\newcommand{\ceval}{\quad \longrightarrow \quad}
-\newcommand{\teval}{\longrightarrow_{\textsf{M}}}
-\newcommand{\eps}[1]{\mkwd{eps}(#1)}
-\newcommand{\affected}[1]{\mkwd{affected}(#1)}
-\newcommand{\halt}{\calcwd{halt}\xspace}
-\newcommand{\bcirc}{\bullet}
-\newcommand{\wcirc}{\circ}
-\newcommand{\disable}[1]{\mkwd{disable}(#1)}
+\newcommand{\procs}[1]{\mkwd{procs}(#1)}
 
-\newcommand{\blocked}[2]{\mkwd{blocked}(#1, #2)}
-\newcommand{\depends}[3]{\mkwd{depends}(#1, #2, #3)}
-\newcommand{\deadlocked}[1]{\mkwd{deadlocked}(#1)}
+\definecolor{shade}{RGB}{215,215,215}
+\newcommand{\shade}[1]{\setlength{\fboxsep}{0pt}\colorbox{shade}{\vphantom{$\mid$}\ensuremath{#1}}}
+%\newcommand{\shade}[1]{#1}
+\newcommand{\shadetext}[1]{\setlength{\fboxsep}{0pt}\colorbox{shade}{#1}}
+\newcommand{\hlred}[1]{\color{red}{#1}}
+% \makeatletter
+% \setlength{\@fptop}{0pt}
+% \makeatother
+\newcommand{\transition}[5]{\calcwd{transition} \: #1 \: #2 \: #3 \: #4 \: #5}
+\newcommand{\transitionalone}[3]{\calcwd{transition} \: #1 \: #2 \: #3}
+\newcommand{\transitionty}[2]{\mkwd{Transition}(#1, #2)}
+\newcommand{\transitiontyone}[1]{\mkwd{Transition}(#1)}
+\newcommand{\notransitionalone}[1]{\calcwd{noTransition} \: #1}
+\newcommand{\notransition}[2]{\calcwd{noTransition} \: #1 \: #2}
+\newcommand{\handlerproctrans}[4]{\handlerproc{#1}{#2}{#3}_{#4}}
+\newcommand{\handlerprocexptrans}[5]{\handlerprocexp{#1}{#2}{#3}{#4}_{#5}}
+\newcommand{\handlerprocexptc}[6]{\handlerprocsub{#1}{#2}{#3}{#4}{#5}_{#6}}
+\newcommand{\vdashtrans}[2]{\vdash^{#1}_{#2}}
+\newcommand{\threadtrans}[2]{(\!( #1 )\!)_{#2}}
 
-\newcommand{\Ceval}{\Longrightarrow_{\textsf{C}}}
+\newcommand{\updating}[1]{\calcwd{updating} \: #1}
+\newcommand{\extracting}[2]{\calcwd{extracting}_{#1} \: #2}
+\newcommand{\extractingt}[3]{\calcwd{extractingT}_{#1, #2} \: #3}
+\newcommand{\extractingtexp}[5]{\calcwd{extractingT}_{(#1, #2, #3), #4} \: #5}
+\newcommand{\rendering}[2]{\calcwd{rendering}_{{#1}} \: #2}
+\newcommand{\renderingext}[3]{\calcwd{rendering}_{{#1}, {#2}} \: #3}
+\newcommand{\transitioning}[4]{\calcwd{transitioning}_{{#1, #2, #3}} \: #4}
+\newcommand{\transitioningextexp}[6]{\calcwd{transitioning}_{{#1, #2, #3, #4, #5}} \: #6}
+\newcommand{\transitioningext}[4]{\calcwd{transitioning}_{{#1, #2, #3}} \: #4}
+\newcommand{\version}[1]{\mkwd{version}(#1)}
 
-\newcommand{\dom}[1]{\mkwd{dom}(#1)}
-
-\newenvironment{remark}{\paragraph{Remark.}}{\hfill \tiny{$\square$}}
-%\newtheorem{remark}{Remark}
-%\newtheorem{lemma}{Lemma}
-%\newtheorem{proposition}{Proposition}
-%\newtheorem{corollary}{Corollary}
-%\newtheorem{definition}{Definition}
-
-
-\newcommand{\defeq}{\triangleq}
-
-\newcommand{\todo}[1]{{\noindent\small\color{red} \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
-\newenvironment{subcase}[1]
-  {\textbf{Subcase #1} \hfill \\
-  \begin{adjustwidth}{0.25cm}{}}
-  {\end{adjustwidth}}
-
-\newenvironment{proofcase}[1]
-  {\totheleft{\textbf{Case \textsc{#1}}}}
-  {}
-\newcommand{\lto}{\multimap}
-\newcommand{\proofstep}[1]{
-  \begin{compactitem}
-  \item #1
-  \end{compactitem}
+\newlength{\mylength}
+\makeatletter
+\newcommand{\mycfs}[1]{%
+  \normalsize
+  \@defaultunits\mylength=#1pt\relax\@nnil
+  \edef\@tempa{{\strip@pt\mylength}}%
+  \ifx\protect\@typeset@protect
+     \edef\@currsize{\noexpand\mycfs\@tempa}% store calculated size
+  \fi
+  \mylength=1.2\mylength
+  \edef\@tempa{\@tempa{\strip@pt\mylength}}%
+  %\@tempa
+  \expandafter\fontsize\@tempa
+  \selectfont
 }
+\makeatother
 
-\newcommand{\names}[1]{\mkwd{names}(#1)}
+\renewcommand{\footnotesize}{\mycfs{8}}
 
-\arraycolsep=1pt%\def\arraystretch{2.2}
+\newcommand{\pagety}[1]{\mkwd{Page}(#1)}
+\newcommand{\pgtag}[4]{\calcwd{htmlTag}_{#4} \: \tagname{#1} \: #2 \: #3}
+\newcommand{\handlers}[2]{\mkwd{handlers}(#1, #2)}
+\newcommand{\diff}[2]{\mkwd{diff}(#1, #2)}
 
-\newcommand{\transl}[1]{\llbracket #1 \rrbracket}
-\newcommand{\stranslateb}[1]{\mathcal{S}\llparenthesis #1 \rrparenthesis}
-\newcommand{\ttranslateb}[1]{\mathcal{T}\llparenthesis #1 \rrparenthesis}
-\newcommand{\etranslateb}[1]{\mathcal{E}\llparenthesis #1 \rrparenthesis}
-\newcommand{\ptranslateb}[1]{\mathcal{P}\llparenthesis #1 \rrparenthesis}
+\newcommand{\redrowskip}{0.5em}
+\newcommand{\qsep}{\:@\:}
+\newcommand{\lin}{\mathsf{L}}
+\newcommand{\unr}{\mathsf{U}}
+\newcommand{\kind}{\kappa}
+\newcommand{\kto}[1]{\to^{#1}}
+\newcommand{\rtv}[1]{#1}
+\newcommand{\recty}[2]{\mu #1 . #2}
+\newcommand{\constty}[1]{\Sigma(#1)}
+\newcommand{\vers}{\iota}
+\newcommand{\uto}{\kto{\unr}}
+\newcommand{\lto}{\kto{\lin}}
+\newcommand{\halt}{\calcwd{halt}}
+\newcommand{\runcomb}[5]{\calcwd{run} \: #1 \: #2 \: #3 \: #4 \: #5}
+\newcommand{\ep}{E_{\textsf{P}}}
+\newcommand{\tp}{T_{\textsf{P}}}
+\newcommand{\domh}{D_{\mkwd{H}}}
+\newcommand{\erase}[1]{\mkwd{erase}(#1)}
 
-\newcommand{\gvoutone}[1]{{!}#1}
-\newcommand{\gvinone}[1]{{?}#1}
-\newcommand{\letintwo}[2]{\calcwd{let} \: #1 = #2 \: \calcwd{in}}
-\newcommand{\totheleft}[1]{\begin{flushleft}#1\end{flushleft}}
-\usepackage[T1]{fontenc}
-\usepackage[scaled=0.85]{beramono}
-\newcommand\doubleplus{+\kern-1.3ex+\kern0.8ex}
-\newcommand{\metadef}[1]{\calcwd{#1}}
-
-
-\newcommand{\runtimechan}[2]{\mkwd{Channel}(#1, #2)}
-\newcommand{\closure}[2]{\langle #1, #2 \rangle}
-%\newcommand{\boldleft}{\textbf{\{ }}
-%\newcommand{\boldright}{\textbf{ \}}}
-\newcommand{\contained}[1]{\metadef{Channels}(#1)}
-
-\newcommand{\ba}{\begin{array}}
-\newcommand{\ea}{\end{array}}
-
-\newcommand{\bl}{\ba[t]{@{}l@{}}}
-\newcommand{\el}{\ea}
-
-
-\newcommand{\triestosend}[4]{{#1} \xRightarrow[#4]{#2} {#3}}
-
-\newcommand{\notsmall}{}
-
-\newcommand{\oftype}{\,{:}\,}
-
-\newcommand{\sendpair}[2]{\calcwd{send} \: (#1, #2)}
-
-%\renewcommand{\paragraph}[1]{\textbf{\textit{#1}}}
+\newcommand{\attribute}[1]{\mkwd{#1}}
+\newcommand{\textnode}[1]{\mathtt{#1}}
+\newcommand{\fn}[1]{\mkwd{fn}(#1)}
 \usepackage{tikz-cd}
 
-\newcommand{\exnty}{\mkwd{Exn}\xspace}
-\newcommand{\raiseexnP}[1]{\calcwd{raise} \: #1}
-\newcommand{\tryinunless}[4]{\calcwd{try} \: #1 \: \calcwd{as} \: #2 \:
-    \calcwd{in} \: #3 \: \calcwd{unless} \: #4}
+\tikzstyle{arrow} = [thick,->]
+\tikzstyle{diagnode} = [rectangle, rounded corners, minimum width=4cm, minimum
+height=1cm,text centered, text width=4cm, draw=black, anchor=center, fill=red!30]
 
-\newcommand{\handled}[1]{\mkwd{Handled}(#1)}
 
-\newcommand{\highlight}[1]{{\color{colorredorange} #1} }
-\newcommand{\highlightpink}[1]{{\color{colorpink} #1} }
-\newcommand{\highlightwarning}[1]{{\color{colorlightpink} #1} }
-\newcommand{\midspace}{\; \mid{} \; }
-\setlength\tabcolsep{1.5em}
-
-\newcommand{\lact}{\lambda_{\text{act}}\xspace}
-\newcommand{\lch}{\lambda_{\text{ch}}\xspace}
