@@ -31,6 +31,7 @@
 $
 \renewcommand*{\arraystretch}{1.8}
 \begin{array}{r}
+   \includegraphics[height=1.5cm, keepaspectratio]{images/logos/erc-logo.jpg} \\
    \includegraphics[height=0.7cm, keepaspectratio]{images/logos/inf_uoe.png} \\
 \end{array}
 $
@@ -40,7 +41,8 @@ $
 
 
 \begin{frame}[fragile]{2FA as a session type}
-
+\setbeamercovered{transparent}
+\onslide<1->{
     \begin{minipage}{0.45\textwidth}
     {\normalsize
 \[
@@ -60,10 +62,12 @@ $
 \]
 }
 \end{minipage}
+}
 ~\hfill
 %
+\onslide<2>{
 \begin{minipage}{0.45\textwidth}
-  {\small
+  {
 \[
 \bl
   \calcwd{TwoFactorClient} \defeq \\
@@ -81,6 +85,7 @@ $
 \]
 }
 \end{minipage}
+}
 \end{frame}
 
 \begin{frame}{A 2FA server}
@@ -101,13 +106,44 @@ $
 }
 \end{frame}
 
-\begin{frame}{Client code?}
+\begin{frame}{An incorrect 2FA server}
 
-  \pause
+{\large
+\[
+  \bl
+  \metadef{twoFactorServer} : \metadef{TwoFactorServer} \lto \one \\
+  \metadef{twoFactorServer}(s) \defeq \\
+  \quad \letintwo{((\textit{username}, \textit{password}), \_)}{\gvrecv{s}} \\
+  \quad \hlred{\letintwo{((\textit{username}, \textit{password}), s)}{\gvrecv{s}}} \\
+  \quad \calcwd{if} \: \metadef{checkDetails}(\textit{username},
+  \textit{password})\: \calcwd{then} \\
+  \qquad \letintwo{s}{\calcwd{select} \: \mkwd{Authenticated} \: s} \: \metadef{serverMain}(s) \\
+  \quad \calcwd{else} \\
+  \qquad \letin{s}{\calcwd{select} \: \mkwd{AccessDenied} \: s}{\gvclose{s}} \\
+  \el
+\]
+}
+
+\begin{center}
+  \Large
+  \textbf{Linearity}: Session endpoints must be used precisely once
+\end{center}
+\end{frame}
+
+
+\begin{frame}{Client code?}
+  \only<1>{
+    \begin{center}
+      \Huge \ldots
+    \end{center}
+  }
+
+  \only<2>{
   \begin{center}
     \includegraphics[width=0.8\textwidth]{images/here-be-dragons.jpg}
 \end{center}
 \hfill \tiny{\url{https://store.steampowered.com/app/945680/Here_Be_Dragons/}}
+}
 \end{frame}
 
 \framecard{{\color{white}\bigtext{Demo: A box and a label}}}
@@ -150,7 +186,61 @@ function updateLabel() {
 \end{minipage}
 \end{frame}
 
+
+\begin{frame}{The Elm Programming Language}
+
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{images/ElmLogo.png}
+  \end{center}
+
+  \begin{fullpageitemize}
+  \item Statically-typed, Haskell-esque, purely-functional web programming language
+  \item Originally based on applicative functional reactive programming
+    \begin{itemize}
+      \itemR \ldots however the designers later (correctly) realised that message passing was a better fit
+    \end{itemize}
+    \item Pioneers the \emph{Model-View-Update} pattern
+  \end{fullpageitemize}
+\end{frame}
+
 \begin{frame}{Model-View-Update}
+
+  \begin{center}
+    \includegraphics[scale=1.3]{images/mvu.png}
+
+    \hfill {\tiny \url{https://www.slideshare.net/RogerioChaves1/introduction-to-elm}}
+  \end{center}
+
+  \begin{fullpageitemize}
+  \item {\Large \textbf{Model}: State of application}
+  \item {\Large \textbf{View}: Renders model as HTML}
+  \item {\Large \textbf{Update}: Updates model based on UI messages}
+  \end{fullpageitemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Model-View-Update (in Links)}
+
+\begin{lstlisting}[language=Links]
+typename Model   = (contents: String);
+typename Message = [| UpdateBox: String |];
+
+sig view : (Model) ~> HTML(Message)
+fun view(model) {
+ vdom
+  <input
+    type="text" value="{model.contents}"
+    e:onInput="{fun(str) { UpdateBox(str) }}"/>
+  <div>{ textNode(reverse(model.contents)) }</div>
+}
+
+sig updt : (Message, Model) ~> Model
+fun updt(UpdateBox(newStr), model) {
+  (contents = newStr)
+}
+
+mvuPage((contents=""), view, updt)
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}{Challenges}
@@ -173,6 +263,34 @@ function updateLabel() {
 \framecard{{\color{white}\bigtext{$\mvu$: Model-View-Update, Formally}}}
 
 \begin{frame}{Syntax}
+
+  {\large
+  \begin{syntax}
+  \text{Types} & A, B, C & ::= & \one \midspace A \to B \midspace A \times B
+  \midspace A + B \midspace \stringty \midspace \intty \\
+               &      & \midspace & \shade{\htmlty{A}} \midspace \shade{\attrty{A}} \\
+%\text{Base types} & C & ::= & \mkwd{String} \midspace \mkwd{Int} \\
+\text{String literals} & s \\
+\text{Integers} & n \\
+%\text{Booleans} & b & ::= & \ttrue \midspace \ffalse \\
+\text{Terms} & L, M, N & ::= &
+  % Basic lambda calculus
+  x \midspace \lambda x . M \midspace M \app N \midspace () \midspace s \midspace n \\
+  & & \midspace & (M, N) \midspace \letin{(x, y)}{M}{N} \\
+  & & \midspace & \inl{x} \midspace \inr{x} \midspace \caseof{L}{\inl{x} \mapsto M; \inr{y} \mapsto N} \\
+  & & \midspace & \shade{\coretag{t}{M}{N}} \midspace \shade{\htmltext{M}} \midspace \shade{\htmlempty} \\
+  & & \midspace & \shade{\attr{\ak}{M}} \midspace \shade{\attrempty} \midspace \shade{\append{M}{N}} \\
+  \end{syntax}
+
+    \[
+  \begin{array}{llp{3em}lrcl}
+    \shade{\text{Tag names}} & \shade{\tagname{t}} & & \shade{\text{Attribute keys}} & \shade{\ak} & ::= & \shade{\mathit{at}} \midspace \shade{\mathit{h}} \\
+    \shade{\text{Attribute names}} \:\: & \shade{\mathit{at}} & & \shade{\text{Event handler names}} & \shade{\mathit{h}}
+     % & & \text{Attributes} & a & ::= & \textit{ak} = \textit{ab}\\
+    % \text{HTML} & H & ::= & \htmltag{t}{\seq{a}}{\seq{H}} \midspace s \midspace \antiquote{M} \\
+    \end{array}
+  \]%
+}
 \end{frame}
 
 \begin{frame}{Syntactic Sugar}
@@ -191,10 +309,14 @@ function updateLabel() {
         (\textit{model}. \textit{contents}))}}}
     \end{array}
     \right\rrbracket
-  \]
+  \]%
+  \vspace{0.25em}
+  {\Huge
   \[
     =
-  \]
+  \]%
+}
+  %\vspace{1em}
   \[
     \begin{array}{l}
         (\coretagone{input} \\
@@ -312,9 +434,17 @@ function updateLabel() {
                 \htmltagqueue{div}{\epsilon}{}
         \el
       }
+      % This hack almost feels like an SQL injection attack
+    \]
+
+    \vspace{1em}
+      \[
+        (\text{where }
+        \handle{m, (v, u), \var{msg}} \defeq \letin{m'}{u \app m}{(m', v \app m')})
   }
   %
   \only<10>{
+    \small
           \sys{\handlerprocexp{(
     \bl
       (\var{contents}=\textit{"k"}), \\
@@ -337,29 +467,117 @@ function updateLabel() {
       }
   }
   %
-  \only<11>{
-    \sys
-{ \bl
-   \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
-   \attribute{value}=\textnode{"k"} \\
-     \quad  \attribute{onInput} = \{ \lambda \var{str}.
-       \mkwd{UpdateBox}(\var{str})\} \qsep \epsilon \closetag \tagzeroend{input}  \\
-       \htmltagqueue{div}{\epsilon}{\textnode{k}}
-\el
-}
+    \only<11>{
+      \sys      {\handlerprocexp{\idle{\;(\textit{contents}=\textnode{"k"})}}{V_v}{V_u}{\epsilon}}
+      { {\bl
+     \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
+     \attribute{value}=\textnode{"k"} \\
+       \quad  \attribute{onInput} = \{ \lambda \var{str}.
+         \mkwd{UpdateBox}(\var{str})\} \qsep \epsilon \closetag \tagzeroend{input}  \\
+         \htmltagqueue{div}{\epsilon}{\textnode{k}}
+  \el}
   }
+    }
 \]
 \end{frame}
 
 \begin{frame}{Metatheory}
+
+
+\begin{theorem}[Preservation]\label{thm:config-pres}
+  If $\Gamma \vdash \config{C}$ and $\config{C} \ceval \config{D}$, then $\Gamma \vdash \config{D}$.
+\end{theorem}
+
+\vspace{1em}
+
+\begin{theorem}[Event Progress]\label{thm:event-progress}
+  If $\cdot \vdash \config{C}$, either:
+  \begin{itemize}
+    \itemR there exists some $\config{C}'$ such that $\config{C} \cevalminus
+      \config{C'}$; or
+    \itemR $\config{C} = \sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon}}{\vh}$ where $\vh$
+      cannot be written $\config{D}[\pgtag{t}{V}{W}{\seq{e}}]$ for some
+      non-empty $\seq{e}$.
+    \end{itemize}
+\end{theorem}
+
 \end{frame}
 
 \framecard{{\color{white}\bigtext{Extending $\mvu$}}}
 
 \begin{frame}{Commands}
+
+  {\small
+  \[
+\bl
+\mkwd{Model} \defeq \mkwd{Maybe}(\intty) \qquad
+\mkwd{Message} \defeq \mkwd{StartComputation} \midspace \mkwd{Result}(\intty) \vspace{0.35em} \\
+%
+%\mkwd{model} : \mkwd{Model} \\
+%\mkwd{model} \defeqw (0, 0) \\ \\
+%
+%\mkwd{view} : \mkwd{Model} \to \htmlty{\mkwd{Message}} \\
+\mkwd{view} = \lambda (x, y) . \calcwd{html} \\
+\quad \{
+  \caseofone{model} \{ \\
+  \qquad
+  {\begin{array}[t]{l}
+     \mkwd{Just}(\textit{result}) \mapsto \htmltext{\intstr{x}}; \\
+     \mkwd{Nothing} \mapsto \htmltext{\textnode{"Waiting \ldots"}} \:
+   \}
+  \quad \} \\
+  \end{array}} \\
+  \quad \htmltag{button}{\attribute{onClick} = \antiquote{\lambda () .
+  \mkwd{StartComputation}} }{\textnode{Start!}} \vspace{0.75em} \\
+\el
+\]%
+\[
+  \bl
+\mkwd{update} : (\mkwd{Message} \times \mkwd{Model}) \to (\mkwd{Model},
+\cmdty{\mkwd{Message}})\\
+\mkwd{update} = \lambda \textit{model} . \\
+\quad \caseofone{\textit{model}} \{ \\
+  \qquad \mkwd{StartComputation} \mapsto (\mkwd{Nothing},
+  \cmdspawn{\mkwd{Result}(\textsf{na\"iveFib}(1000))}) \\
+  \qquad \mkwd{Result}(x) \mapsto (\mkwd{Just}(x), \cmdempty) \\
+  \quad \}
+\el
+\]%
+}
 \end{frame}
 
 \begin{frame}{Linearity}
+
+  \begin{fullpageitemize}
+  \item Stock \mvu does not support linearity (as $m'$ is used non-linearly when calculating new model and view):
+  \end{fullpageitemize}
+  \[
+    \handle{m, (v, u), \var{msg}} \defeq \letin{m'}{u \app m}{(\hlred{m'}, v \app \hlred{m'})}
+  \]
+  \begin{fullpageitemize}
+  \itemR Idea: linear parts of model only used in update, not view. \emph{Extract} unrestricted part of the model:
+  \end{fullpageitemize}
+  \[
+    \begin{array}{lcl}
+      \mkwd{extract} & : & \mkwd{Model} \to (\mkwd{Model} \times \mkwd{UnrestrictedModel}) \\
+      \mkwd{view}    & : & \mkwd{UnrestrictedModel} \to \htmlty{\mkwd{Message}} \\
+    \end{array}
+  \]
+\[
+\begin{array}{l}
+  \handle{\textit{m}, (\textit{v}, \textit{u}, \textit{e}), \textit{msg}}
+  \defeq
+    \begin{aligned}[t]
+      & \letintwo{m'}{u \app (\textit{msg}, m)} \\
+      & \shade{\letintwo{(m', \textit{unrM})}{e \app m'}} \\
+      & {(m', v \app \shade{\textit{unrM}})}
+    \end{aligned}
+  \end{array}
+\]
+
+% \begin{center}
+%   (Remainder of machinery for integrating linear / unrestricted types standard)
+% \end{center}
 \end{frame}
 
 \framecard{{\color{white}\bigtext{Demo: PingPong application}}}
@@ -368,14 +586,109 @@ function updateLabel() {
 \end{frame}
 
 \begin{frame}{Model transitions}
+\setbeamercovered{transparent}
+  \small
+    \framebox{
+\begin{minipage}[t]{0.4\textwidth}
+  \begin{center}
+    \mkwd{Waiting} \text{state}
+  \end{center}
+  \vspace{-1em}
+  \[
+  \bl
+  \mkwd{WModel} \defeq \mkwd{Waiting} \\
+  \mkwd{WUModel} \defeq \one \\
+  \mkwd{WMessage} \defeq \mkwd{Ponged}(c) \\ \\
+  %
+  \mkwd{wView} \defeq \lambda \var{()} . \: \calcwd{html} \\
+  \quad \opentag{button} \: \attribute{disabled}=\textnode{"true"} \closetag \\
+  \qquad \textnode{Send Ping!} \\
+  \quad \tagzeroend{button} \\ \\
+  %
+  \mkwd{wUpdate} \defeq \lambda(\mkwd{Ponged}(c), \mkwd{Waiting}) . \\
+  \quad
+  \calcwd{transition} \: {\mkwd{Pinging}(c)} \: {\mkwd{pView}} \\
+  \qquad {\mkwd{pUpdate}} \: {\mkwd{pExtract}} \: {\cmdempty} \\ \\
+  %
+  \mkwd{wExtract} \defeq \lambda x . (\mkwd{Waiting}, ())
+  \\
+  \vspace{0.3em}
+  \el
+  %
+  \]
+\end{minipage}
+}
+\hfill
+\onslide<2>{
+\framebox{
+\begin{minipage}[t]{0.5\textwidth}
+  \begin{center}
+  \mkwd{Pinging} \text{state}
+  \end{center}
+  \vspace{-1em}
+  \[
+  \bl
+  \mkwd{PModel} \defeq \mkwd{Pinging}(\mkwd{PingPong}) \\
+  \mkwd{PUModel} \defeq \one \\
+  \mkwd{PMessage} \defeq \mkwd{Click}
+  \vspace{0.275em} \\
+  %
+  \mkwd{pView} \defeq \lambda () . \: \calcwd{html} \\
+    \quad \opentag{button} \: {\attribute{onClick} = \antiquote{\lambda () . \mkwd{Click}}} \closetag \\
+    \qquad \textnode{Send Ping!} \\
+    \quad \tagzeroend{button} \vspace{0.4em} \\
+    %
+\mkwd{pUpdate} \defeq \lambda (\mkwd{Click}, \mkwd{Pinging}(c)) . \\
+\quad \letintwo{c}{\gvsend{\mkwd{Ping}}{c}} \\
+    \quad \calcwd{let} \: {\var{cmd}} = \\
+    \qquad {\cmdspawn{(
+         {\begin{aligned}[t]
+         & \letintwo{(\var{pong}, c)}{\gvrecv{c}} \\
+         & {\mkwd{Ponged}(c)}) \: \calcwd{in}
+    \end{aligned}}}}  \\
+    \quad
+    \transition{()}{\mkwd{wView}}{\mkwd{wUpdate}}{\mkwd{wExtract}}{\var{cmd}}
+    \vspace{0.4em} \\
+    \mkwd{pExtract} \defeq \lambda c . (c, ())
+  \el
+  \]
+\end{minipage}
+}
+}
 \end{frame}
 
 \framecard{{\color{white}\bigtext{Wrapping up}}}
 
 \begin{frame}{Conclusion}
+
   \begin{fullpageitemize}
-  \itemR Draft paper! \url{http://simonjf.com/drafts/links-mvu-draft-october2019-1.pdf}
+
+  \item {\LARGE{\textbf{Summary}}}
+    \begin{itemize}
+      \itemR First formal characterisation of MVU architecture
+      \itemR First formal integration of session-typed communication and GUI programming
+      \itemR Not only Greek: fully implemented in Links, along with examples
+    \end{itemize}
+    \vspace{1em}
+  \item {\LARGE{\textbf{Find out more!}}}
+      \begin{itemize}
+        \itemR Draft paper: \url{http://bit.ly/mvu-draft}
+        \itemR Artifact: \url{http://bit.ly/mvu-artifact}
+      \end{itemize}
   \end{fullpageitemize}
+ \vspace{1em}
+  \centering
+  \texttt{@Simon\_JF}
+
+  \centering
+  \texttt{simon.fowler@ed.ac.uk}
+
+  \centering
+  \url{http://www.links-lang.org}
+
+  \centering
+  \texttt{opam install links}
+
 \end{frame}
 
 \end{document}

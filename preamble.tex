@@ -216,7 +216,7 @@ fork, spawnClient, cancel, catch, page, close, Any, Type, Unl, forall, vdom},%
 \newcommand{\shade}[1]{\setlength{\fboxsep}{0pt}\colorbox{shade}{\vphantom{$\mid$}\ensuremath{#1}}}
 %\newcommand{\shade}[1]{#1}
 \newcommand{\shadetext}[1]{\setlength{\fboxsep}{0pt}\colorbox{shade}{#1}}
-\newcommand{\hlred}[1]{\color{red}{#1}}
+\newcommand{\hlred}[1]{{\color{red}{#1}}}
 % \makeatletter
 % \setlength{\@fptop}{0pt}
 % \makeatother
@@ -287,7 +287,7 @@ fork, spawnClient, cancel, catch, page, close, Any, Type, Unl, forall, vdom},%
 \newcommand{\erase}[1]{\mkwd{erase}(#1)}
 
 \newcommand{\attribute}[1]{\mkwd{#1}}
-\newcommand{\textnode}[1]{\mathtt{#1}}
+\newcommand{\textnode}[1]{\texttt{#1}}
 \newcommand{\fn}[1]{\mkwd{fn}(#1)}
 \usepackage{tikz-cd}
 
@@ -295,4 +295,6 @@ fork, spawnClient, cancel, catch, page, close, Any, Type, Unl, forall, vdom},%
 \tikzstyle{diagnode} = [rectangle, rounded corners, minimum width=4cm, minimum
 height=1cm,text centered, text width=4cm, draw=black, anchor=center, fill=red!30]
 
-
+\newenvironment{syntax}%
+{\[\begin{array}{@{}lr@{\:\:\:}c@{\:\:\:}l}\ignorespaces}
+{\end{array}\]\ignorespacesafterend}
