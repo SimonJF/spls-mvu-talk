@@ -586,15 +586,27 @@ mvuPage((contents=""), view, updt)
 
 \begin{frame}{Commands}
 
+  \begin{fullpageitemize}
+  \item \textbf{Commands}: Allow side effects to be performed by event loop
+  \item Example: Asynchronous na\"ive Fibonacci
+  \end{fullpageitemize}
+
   {\small
+    \onslide<2->{
   \[
 \bl
 \mkwd{Model} \defeq \mkwd{Maybe}(\intty) \qquad
-\mkwd{Message} \defeq \mkwd{StartComputation} \midspace \mkwd{Result}(\intty) \vspace{0.75em} \\
+\mkwd{Message} \defeq \mkwd{StartComputation} \midspace \mkwd{Result}(\intty) \vspace{0.75em}
+\el
+\]
+}
 %
 %\mkwd{model} : \mkwd{Model} \\
 %\mkwd{model} \defeqw (0, 0) \\ \\
 %
+\onslide<3->{
+\[
+  \bl
 \mkwd{view} : \mkwd{Model} \to \htmlty{\mkwd{Message}} \\
 \mkwd{view} = \lambda \var{model} . \calcwd{html} \\
 \quad \{
@@ -610,6 +622,8 @@ mvuPage((contents=""), view, updt)
   \mkwd{StartComputation}} }{\textnode{Start!}} \vspace{0.75em} \\
 \el
 \]%
+}
+\onslide<4->{
 \[
   \bl
 \mkwd{update} : (\mkwd{Message} \times \mkwd{Model}) \to (\mkwd{Model},
@@ -622,6 +636,7 @@ mvuPage((contents=""), view, updt)
   \quad \}
 \el
 \]%
+}
 }
 \end{frame}
 
