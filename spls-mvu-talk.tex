@@ -174,8 +174,8 @@ function updateLabel() {
 \hfill
 \begin{minipage}{0.35\textwidth}
     \begin{tikzpicture}[node distance=1.5cm]
-      \node (0) [diagnode] { Event invoked };
-      \node (1) [diagnode, below of=0]{ Message sent to handler };
+      \node (0) [diagnode] { \lstinline+input+ Event };
+      \node (1) [diagnode, below of=0]{ Handler function (\lstinline+updateLabel+) invoked };
       \node (2) [diagnode, below of=1]{ Process reads data from DOM };
       \node (3) [diagnode, below of=2]{ Process updates data in DOM };
 
@@ -184,6 +184,19 @@ function updateLabel() {
       \draw [arrow] (2) -- (3);
     \end{tikzpicture}
 \end{minipage}
+\end{frame}
+
+\begin{frame}[plain]
+  \begin{center}
+    \includegraphics{images/boo.png}
+  \end{center}
+
+  {\Large
+    \begin{itemize}
+      \item Brittle: No connection between DOM and application state
+      \item \textbf{Depressingly} imperative
+    \end{itemize}
+  }
 \end{frame}
 
 
@@ -197,7 +210,7 @@ function updateLabel() {
   \item Statically-typed, Haskell-esque, purely-functional web programming language
   \item Originally based on applicative functional reactive programming
     \begin{itemize}
-      \itemR \ldots however the designers later (correctly) realised that message passing was a better fit
+      \itemR \ldots however the designers later realised that message passing was a better fit
     \end{itemize}
     \item Pioneers the \emph{Model-View-Update} pattern
   \end{fullpageitemize}
@@ -221,10 +234,18 @@ function updateLabel() {
 
 \begin{frame}[fragile]{Model-View-Update (in Links)}
 
+\setbeamercovered{transparent}
+\vspace{-1em}
+\begin{overlayarea}{\linewidth}{10cm}
+\begin{uncoverenv}<1->
 \begin{lstlisting}[language=Links]
 typename Model   = (contents: String);
 typename Message = [| UpdateBox: String |];
+\end{lstlisting}
+\end{uncoverenv}
 
+\begin{uncoverenv}<2->
+\begin{lstlisting}[language=Links]
 sig view : (Model) ~> HTML(Message)
 fun view(model) {
  vdom
@@ -233,14 +254,24 @@ fun view(model) {
     e:onInput="{fun(str) { UpdateBox(str) }}"/>
   <div>{ textNode(reverse(model.contents)) }</div>
 }
+\end{lstlisting}
+\end{uncoverenv}
 
+  \begin{uncoverenv}<3->
+\begin{lstlisting}[language=Links]
 sig updt : (Message, Model) ~> Model
 fun updt(UpdateBox(newStr), model) {
   (contents = newStr)
 }
+\end{lstlisting}
+\end{uncoverenv}
 
+  \begin{uncoverenv}<4->
+\begin{lstlisting}[language=Links]
 mvuPage((contents=""), view, updt)
 \end{lstlisting}
+\end{uncoverenv}
+\end{overlayarea}
 \end{frame}
 
 \begin{frame}{Challenges}
@@ -256,6 +287,30 @@ mvuPage((contents=""), view, updt)
     \begin{itemize}
       \itemR Writing client code using distributed session-typed channels in Links is painful: can we do better?
       \itemR Would provide first formal integration of session types and GUIs
+    \end{itemize}
+  \end{fullpageitemize}
+\end{frame}
+
+\begin{frame}{Contributions}
+  \begin{fullpageitemize}
+  \item {\Large \textbf{\mvu: A Formal Model of the MVU Architecture}}
+    \begin{itemize}
+      \itemR First formal characterisation of MVU
+      \itemR Soundness proofs
+    \end{itemize}
+    \vspace{0.25em}
+
+  \item {\Large \textbf{Extending \mvu}}
+    \begin{itemize}
+      \itemR Formal characterisations of \emph{subscriptions} and \emph{commands} from Elm
+      \itemR \emph{Linearity} and \emph{model transitions} allow safe integration of session types
+    \end{itemize}
+    \vspace{0.25em}
+
+  \item {\Large \textbf{Implementation and Examples}}
+    \begin{itemize}
+      \itemR MVU + extensions implemented in Links language
+      \itemR Example applications including two-factor authentication and chat server
     \end{itemize}
   \end{fullpageitemize}
 \end{frame}
@@ -298,14 +353,15 @@ mvuPage((contents=""), view, updt)
     \[
       \left\llbracket
     \begin{array}{l}
+      \calcwd{html} \\
       %\mkwd{view} \defeq \lambda \textit{model} . \calcwd{html} \\
-      \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+      \quad \opentag{input} \: \attribute{type}=\textnode{"text"} \:
       \attribute{value} = \{ \var{model}.\var{contents} \} \\
-      \quad
+      \qquad
         \attribute{onInput} = \{ \lambda \textit{str}.
           \mkwd{UpdateBox}(\textit{str})\} \closetag \tagzeroend{input}  \\
           %
-        \htmltagzero{div}{\antiquote{\htmltext{(\metadef{reverseString} \:
+        \quad \htmltagzero{div}{\antiquote{\htmltext{(\metadef{reverseString} \:
         (\textit{model}. \textit{contents}))}}}
     \end{array}
     \right\rrbracket
@@ -334,17 +390,40 @@ mvuPage((contents=""), view, updt)
 
 \begin{frame}{Semantics by example: Box and a label}
 
+  \large
+\[
+      \bl
+      \mkwd{model} \defeq (\var{contents} = \textnode{""}) \vspace{2em} \\
+      \mkwd{view} \defeq \lambda \textit{model} . \calcwd{html} \\
+      \quad \opentag{input} \: \attribute{type}=\textnode{"text"} \:
+      \attribute{value} = \{ \var{model}.\var{contents} \} \\
+      \qquad
+        \attribute{onInput} = \{ \lambda \textit{str}.
+          \mkwd{UpdateBox}(\textit{str})\} \closetag \tagzeroend{input}  \\
+          %
+        \quad \htmltagzero{div}{\antiquote{\htmltext{(\metadef{reverseString} \:
+        (\textit{model}. \textit{contents}))}}} \vspace{2em} \\
+        %
+        \mkwd{update} \defeq \lambda \mkwd{UpdateBox}(\var{str}) . (\var{contents} = \var{str})
+      \el
+    \]
+\end{frame}
+
+\begin{frame}{Semantics by example: Box and a label}
+
+  \large
+\begin{overlayarea}{\linewidth}{5cm}
   \[
   \only<1>{
-    \run{V_m}{V_v}{V_u}
+     \run{\mkwd{model}}{\mkwd{view}}{\mkwd{update}}
   }
   %
   \only<2>{
-    \sys{\handlerprocexp{(V_m, V_v V_m)}{V_v}{V_u}{\epsilon}}{\htmlempty}
+    \sysexample{\handlerprocexp{(\mkwd{model}, \mkwd{view} \app \mkwd{model})}{\mkwd{view}}{\mkwd{update}}{\epsilon}}{\htmlempty}
   }
   %
   \only<3>{
-    \sys{\handlerprocexp{(V_m,
+    \sysexample{\handlerprocexp{(\mkwd{model},
         \bl
         \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
           \attribute{value}=\textnode{""} \\
@@ -353,11 +432,11 @@ mvuPage((contents=""), view, updt)
               \tagzeroend{input}  \\
                \htmltagzero{div}{}
         \el
-      )}{V_v}{V_u}{\epsilon}}{\htmlempty}
+      )}{\mkwd{view}}{\mkwd{update}}{\epsilon}}{\htmlempty}
   }
   %
   \only<4>{
-      \sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon}}{
+      \sysexample{\handlerprocexp{\idle{\mkwd{model}}}{\mkwd{view}}{\mkwd{update}}{\epsilon}}{
       {\bl
         \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
         \attribute{value}=\textnode{""} \\
@@ -369,7 +448,7 @@ mvuPage((contents=""), view, updt)
   }
   %
   \only<5>{
-        \sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon}}{
+        \sysexample{\handlerprocexp{\idle{\mkwd{model}}}{\mkwd{view}}{\mkwd{update}}{\epsilon}}{
       \bl
       \opentag{input} \: \attribute{type}=\textnode{"text"} \:
       \attribute{value}=\textnode{""} \\
@@ -383,7 +462,7 @@ mvuPage((contents=""), view, updt)
   }
   %
   \only<6>{
-    \sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon}}{
+    \sysexample{\handlerprocexp{\idle{\mkwd{model}}}{\mkwd{view}}{\mkwd{update}}{\epsilon}}{
         \bl
         \opentag{input} \: \attribute{type}=\textnode{"text"} \:
         \attribute{value}=\textnode{""} \\
@@ -397,7 +476,7 @@ mvuPage((contents=""), view, updt)
   }
   %
   \only<7>{
-\sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\epsilon} \parallel
+\sysexample{\handlerprocexp{\idle{\mkwd{model}}}{\mkwd{view}}{\mkwd{update}}{\epsilon} \parallel
           \thread{\mkwd{UpdateBox}(\textnode{"k"})}}{
         \bl
         \opentag{input} \: \attribute{type}=\textnode{"text"} \:
@@ -411,7 +490,7 @@ mvuPage((contents=""), view, updt)
   }
   %
   \only<8>{
-\sys{\handlerprocexp{\idle{V_m}}{V_v}{V_u}{\mkwd{UpdateBox}(\textnode{"k"})}}{
+\sysexample{\handlerprocexp{\idle{\mkwd{model}}}{\mkwd{view}}{\mkwd{update}}{\mkwd{UpdateBox}(\textnode{"k"})}}{
         \bl
         \opentag{input} \: \attribute{type}=\textnode{"text"} \:
         \attribute{value}=\textnode{""} \\
@@ -424,7 +503,7 @@ mvuPage((contents=""), view, updt)
   }
   %
   \only<9>{
-      \sys{\handlerprocexp{\handle{V_m, (V_v, V_u), \mkwd{UpdateBox}(\textnode{"k"})}}{V_v}{V_u}{\epsilon}}{
+      \sysexample{\handlerprocexp{\handle{\mkwd{model}, (\mkwd{view}, \mkwd{update}), \mkwd{UpdateBox}(\textnode{"k"})}}{\mkwd{view}}{\mkwd{update}}{\epsilon}}{
         \bl
         \opentag{input} \: \attribute{type}=\textnode{"text"} \:
         \attribute{value}=\textnode{""} \\
@@ -440,12 +519,11 @@ mvuPage((contents=""), view, updt)
     \vspace{1em}
       \[
         (\text{where }
-        \handle{m, (v, u), \var{msg}} \defeq \letin{m'}{u \app m}{(m', v \app m')})
+        \handle{m, (v, u), \var{msg}} \defeq \letin{m'}{u \app (\var{msg}, m)}{(m', v \app m')})
   }
   %
   \only<10>{
-    \small
-          \sys{\handlerprocexp{(
+          \sysexample{\handlerprocexp{(
     \bl
       (\var{contents}=\textit{"k"}), \\
        \quad \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
@@ -455,7 +533,7 @@ mvuPage((contents=""), view, updt)
         \quad \tagzeroend{input}  \\
            \quad  \htmltagzero{div}{k} \\
     \el
-        )}{V_v}{V_u}{\epsilon}}{
+        )}{\mkwd{view}}{\mkwd{update}}{\epsilon}}{
         \bl
         \opentag{input} \: \attribute{type}=\textnode{"text"} \:
         \attribute{value}=\textnode{""} \\
@@ -468,7 +546,7 @@ mvuPage((contents=""), view, updt)
   }
   %
     \only<11>{
-      \sys      {\handlerprocexp{\idle{\;(\textit{contents}=\textnode{"k"})}}{V_v}{V_u}{\epsilon}}
+      \sysexample{\handlerprocexp{\idle{\;(\textit{contents}=\textnode{"k"})}}{\mkwd{view}}{\mkwd{update}}{\epsilon}}
       { {\bl
      \opentag{input} \: \attribute{type}=\textnode{"text"} \:\:
      \attribute{value}=\textnode{"k"} \\
@@ -479,6 +557,7 @@ mvuPage((contents=""), view, updt)
   }
     }
 \]
+\end{overlayarea}
 \end{frame}
 
 \begin{frame}{Metatheory}
@@ -511,13 +590,13 @@ mvuPage((contents=""), view, updt)
   \[
 \bl
 \mkwd{Model} \defeq \mkwd{Maybe}(\intty) \qquad
-\mkwd{Message} \defeq \mkwd{StartComputation} \midspace \mkwd{Result}(\intty) \vspace{0.35em} \\
+\mkwd{Message} \defeq \mkwd{StartComputation} \midspace \mkwd{Result}(\intty) \vspace{0.75em} \\
 %
 %\mkwd{model} : \mkwd{Model} \\
 %\mkwd{model} \defeqw (0, 0) \\ \\
 %
-%\mkwd{view} : \mkwd{Model} \to \htmlty{\mkwd{Message}} \\
-\mkwd{view} = \lambda (x, y) . \calcwd{html} \\
+\mkwd{view} : \mkwd{Model} \to \htmlty{\mkwd{Message}} \\
+\mkwd{view} = \lambda \var{model} . \calcwd{html} \\
 \quad \{
   \caseofone{model} \{ \\
   \qquad
@@ -553,10 +632,13 @@ mvuPage((contents=""), view, updt)
   \end{fullpageitemize}
   \[
     \handle{m, (v, u), \var{msg}} \defeq \letin{m'}{u \app m}{(\hlred{m'}, v \app \hlred{m'})}
-  \]
+  \]%
+  \vspace{0.25em}
   \begin{fullpageitemize}
-  \itemR Idea: linear parts of model only used in update, not view. \emph{Extract} unrestricted part of the model:
+  \itemR Idea: linear parts of model only used in update, not view. \\
+    \emph{Extract} unrestricted part of the model:
   \end{fullpageitemize}
+  \begin{mybox}
   \[
     \begin{array}{lcl}
       \mkwd{extract} & : & \mkwd{Model} \to (\mkwd{Model} \times \mkwd{UnrestrictedModel}) \\
@@ -574,6 +656,7 @@ mvuPage((contents=""), view, updt)
     \end{aligned}
   \end{array}
 \]
+\end{mybox}
 
 % \begin{center}
 %   (Remainder of machinery for integrating linear / unrestricted types standard)
@@ -583,6 +666,84 @@ mvuPage((contents=""), view, updt)
 \framecard{{\color{white}\bigtext{Demo: PingPong application}}}
 
 \begin{frame}{PingPong in $\mvu$}
+
+\setbeamercovered{transparent}
+  {\small
+    \begin{minipage}[t]{0.45\textwidth}
+      \[
+        \bl
+        \mkwd{PingPong} \defeq \mu t . {!}\mkwd{Ping} . {?}\mkwd{Pong} . t \vspace{0.5em} \\
+        \mkwd{Model} \defeq \mkwd{Pinging}(\mkwd{PingPong}) \midspace \mkwd{Waiting} \\
+        \mkwd{Message} \defeq \mkwd{Click} \midspace \mkwd{Ponged}(\mkwd{PingPong})
+        \el
+      \]%
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.475\textwidth}
+\[
+   \bl
+  \mkwd{update} \defeq  \lambda (\textit{msg}, \textit{model}) . \\
+  \quad \caseofone{\textit{msg}} \{ \\
+    \qquad \mkwd{Click} \mapsto \mkwd{handleClick}(\var{model}) \\
+    \qquad \mkwd{Ponged}(c) \mapsto \mkwd{handlePonged}(\var{model}, c) \\
+      \quad \}
+  \el
+\]
+    \end{minipage}
+    \onslide<2>{
+\begin{minipage}[t]{0.6\textwidth}
+\[
+  \bl
+  \mkwd{handleClick}(\var{model}) \defeq \\
+  \quad \caseofone{\var{model}} \{ \\
+    \qquad \mkwd{Pinging}(c) \mapsto \\
+    \quad \qquad \letintwo{c}{\gvsend{\mkwd{Ping}}{c}} \\
+    \quad \qquad \calcwd{let} \: {\var{cmd}} = \\
+    \quad \qquad \quad {\cmdspawn{(
+         {\begin{aligned}[t]
+         & \letintwo{(\var{pong}, c)}{\gvrecv{c}} \\
+         & {\mkwd{Ponged}(c)}) \: \calcwd{in}
+    \end{aligned}}}}  \\
+    \qquad \quad (\mkwd{Waiting}, \var{cmd}) \\
+    \qquad \hlred{\mkwd{Waiting} \mapsto (\mkwd{Waiting}, \cmdempty)} \\
+   \quad \}
+   \el
+\]
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.35\textwidth}
+\[
+  \bl
+  \mkwd{handlePonged}(\var{model}, c) \defeq \\
+    \quad \caseofone{\var{model}} \{ \\
+      \qquad \hlred{\mkwd{Pinging}(c') \mapsto} \\
+      \qquad \quad \hlred{\gvcancel{c'};} \\
+      \qquad \quad \hlred{(\mkwd{Pinging}(c), \cmdempty)} \\
+       \qquad \mkwd{Waiting} \mapsto \\
+       \qquad \quad (\mkwd{Pinging}(c), \cmdempty) \\
+     \quad \}
+   \el
+ \]
+\end{minipage}
+}
+}
+\end{frame}
+
+\begin{frame}{Illegal states}
+  \begin{fullpageitemize}
+    \item {\LARGE \textbf{Issue}}
+      \begin{itemize}
+        \itemR Must handle messages impossible in a given state
+          (e.g., receiving a pong while waiting to send a ping)
+        \itemR Problem: models treated as sum types
+      \end{itemize}
+      \vspace{0.25em}
+    \item {\LARGE \textbf{Proposal}}
+      \begin{itemize}
+        \itemR \emph{Multiple} model types, \emph{transitions} between them
+        \itemR Make illegal states unrepresentable!
+      \end{itemize}
+  \end{fullpageitemize}
 \end{frame}
 
 \begin{frame}{Model transitions}

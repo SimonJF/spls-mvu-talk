@@ -14,6 +14,7 @@
 \usepackage{dirtytalk}
 \usepackage{xparse}% http://ctan.org/pkg/xparse
 \usepackage{etoolbox}% http://ctan.org/pkg/etoolbox
+\usepackage[framemethod=tikz]{mdframed}
 \newcommand{\lambdacalc}{\ensuremath{\lambda}-calculus\xspace}
 \newenvironment{fake}[1]{\par\vspace{3pt}\noindent\textbf{#1}\itshape}{\normalfont\ignorespacesafterend\vspace{3pt}\par}
 \newcommand{\calcwd}[1]{\textbf{\textsf{#1}}}
@@ -76,8 +77,12 @@
 \newcommand{\handlerproc}[3]{\langle #1 \mid #2 \mid #3 \rangle}
 \newcommand{\handlerprocexp}[4]{\langle #1 \mid \state{#2}{#3} \mid #4 \rangle}
 \newcommand{\handlerprocsub}[5]{\langle #1 \mid \statesub{#2}{#3}{#4} \mid #5 \rangle}
-\newcommand{\idle}[1]{\calcwd{idle} \: {#1}}
+\newcommand{\idle}[1]{\calcwd{idle} \; {#1}}
 \newcommand{\sys}[2]{#1 \fatsemi\: #2}
+\newcommand{\sysexample}[2]{
+  {\bl
+  #1 \fatsemi \vspace{0.5em} \\ #2
+   \el}}
 \newcommand{\syssub}[4]{#1 \fatsemi\: #2 \fatsemi\: #3 \fatsemi\: #4}
 
 \newcommand{\evalarrow}{\longrightarrow}
@@ -278,7 +283,7 @@ fork, spawnClient, cancel, catch, page, close, Any, Type, Unl, forall, vdom},%
 \newcommand{\constty}[1]{\Sigma(#1)}
 \newcommand{\vers}{\iota}
 \newcommand{\uto}{\kto{\unr}}
-\newcommand{\lto}{\kto{\lin}}
+\newcommand{\lto}{\multimap}
 \newcommand{\halt}{\calcwd{halt}}
 \newcommand{\runcomb}[5]{\calcwd{run} \: #1 \: #2 \: #3 \: #4 \: #5}
 \newcommand{\ep}{E_{\textsf{P}}}
@@ -298,3 +303,7 @@ height=1cm,text centered, text width=4cm, draw=black, anchor=center, fill=red!30
 \newenvironment{syntax}%
 {\[\begin{array}{@{}lr@{\:\:\:}c@{\:\:\:}l}\ignorespaces}
 {\end{array}\]\ignorespacesafterend}
+
+%\definecolor{mycolor}{rgb}{0.122, 0.435, 0.698}
+
+\newmdenv[innerlinewidth=0.5pt,linecolor=black]{mybox}
